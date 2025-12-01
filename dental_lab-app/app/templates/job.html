@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Job Details</h1>
+  <ul>
+    <li>Patient Name: {{ job.patient_name }}</li>
+    <li>Doctor Name: {{ job.doctor_name }}</li>
+    <li>Type: {{ job.job_type }}</li>
+    <li>Practice Name: {{ job.practice_name }}</li>
+    <li>Lab Slip Number: {{ job.lab_slip_number }}</li>
+    <li>Job Status: {{ job.job_status }}</li>
+    <li>Due Date: {{ job.due_date.strftime('%d/%m/%Y') }}</li>
+    <li>Shade: {{ job.shade }}</li>
+    <li>Invoice Number: {{ job.invoice_number }}</li>
+    <li>Recieved By/ Waybill: {{ job.delivery_info }}</li>
+    <li>Comments: {{ job.comments }}</li>
+  </ul>
+  <a href="{{ url_for('index') }}">Back to Jobs</a>
+{% endblock %}

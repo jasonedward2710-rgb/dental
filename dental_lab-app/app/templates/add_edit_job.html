@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.job_type.label }}<br>
+        {{ form.job_type() }}
+    </p>
+    <p>
+        {{ form.practice_name.label }}<br>
+        {{ form.practice_name() }}
+    </p>
+    <p>
+        {{ form.doctor_name.label }}<br>
+        {{ form.doctor_name() }}
+    </p>
+    <p>
+        {{ form.patient_name.label }}<br>
+        {{ form.patient_name(size=32) }}
+    </p>
+    <p>
+        {{ form.lab_slip_number.label }}<br>
+        {{ form.lab_slip_number(size=32) }}
+    </p>
+    <p>
+        {{ form.job_status.label }}<br>
+        {{ form.job_status() }}
+    </p>
+    <p>
+        {{ form.due_date.label }}<br>
+        {{ form.due_date() }}
+    </p>
+    <p>
+        {{ form.shade.label }}<br>
+        {{ form.shade(size=32) }}
+    </p>
+    <p>
+        {{ form.invoice_number.label }}<br>
+        {{ form.invoice_number(size=32) }}
+    </p>
+    <p>
+        {{ form.delivery_info.label }}<br>
+        {{ form.delivery_info(size=32) }}
+    </p>
+    <p>
+        {{ form.comments.label }}<br>
+        {{ form.comments(rows=5, cols=40) }}
+    </p>
+    <p>
+        <input type="submit" value="{{ title }}">
+    </p>
+</form>
+{% endblock %}

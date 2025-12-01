@@ -1,0 +1,257 @@
+body {
+    font-family: 'Inter', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+nav {
+    background-color: #1f5593; /* Dark blue from the logo */
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600; /* Bold */
+}
+
+nav .logo img {
+    height: 50px;
+}
+
+nav .nav-links {
+    display: flex;
+    align-items: center;
+}
+
+nav .nav-links a {
+    color: white;
+    text-decoration: none;
+    margin-right: 15px;
+}
+
+nav .nav-links a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    color: #1f5593;
+    font-weight: 700; /* Bold */
+}
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-weight: 600; /* Bold */
+}
+
+.filter-group {
+    margin-right: 20px;
+    flex: 1;
+    min-width: 200px;
+    font-weight: 600; /* Bold */
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-weight: 600; /* Bold */
+}
+
+.filter-group input,
+.filter-group select {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-weight: 600; /* Bold */
+}
+
+.filter-button {
+    align-self: flex-end;
+    padding: 10px 20px;
+    background-color: #1f5593;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 20px;
+    font-weight: 600; /* Bold */
+}
+
+.filter-button:hover {
+    background-color: #163d70; /* Darker shade of blue */
+}
+
+.refresh-button {
+    align-self: flex-end;
+    padding: 10px 20px;
+    background-color: #27ae60; /* Green from the logo */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-left: 20px;
+    font-weight: 600; /* Bold */
+}
+
+.refresh-button:hover {
+    background-color: #1e8449; /* Darker shade of green */
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 5px;
+    text-align: left;
+}
+
+th {
+    background-color: #1f5593;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #ddd;
+}
+
+form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form p {
+    margin: 10px 0;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+form input[type="text"],
+form input[type="password"],
+form select,
+form input[type="date"] {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0 10px;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+form input[type="submit"] {
+    background-color: #1f5593;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+form input[type="submit"]:hover {
+    background-color: #163d70;
+}
+
+.alert {
+    padding: 10px;
+    background-color: #f44336;
+    color: white;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+.alert.success {background-color: #4CAF50;}
+.alert.info {background-color: #2196F3;}
+.alert.warning {background-color: #ff9800;}
+
+.actions {
+    display: flex;
+    gap: 5px;
+}
+
+.actions a,
+.actions form button {
+    background-color: #1f5593;
+    color: white;
+    width: 60px;
+    height: 25px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    text-align: center;
+    line-height: 25px;
+    display: inline-block;
+    font-size: 12px;
+}
+
+.actions a:hover,
+.actions form button:hover {
+    background-color: #163d70;
+}
+
+.actions form {
+    display: inline-block;
+    margin: 0; /* Remove any default margins */
+    padding: 0; /* Remove any default padding */
+}
+
+.actions form button.delete-button {
+    background-color: #dc3545; /* Red color for delete button */
+    color: white;
+    width: 25px; /* Reduced width */
+    height: 25px; /* Fixed height */
+    padding: 0;
+    border: none;
+    border-radius: 50%; /* Make it a circle */
+    text-decoration: none;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px; /* Adjust font size */
+    line-height: 25px; /* Center text vertically */
+    box-shadow: none; /* Remove any box shadow */
+    outline: none; /* Remove outline */
+}
+
+.actions form button.delete-button:hover {
+    background-color: #c82333; /* Darker shade for hover effect */
+}
