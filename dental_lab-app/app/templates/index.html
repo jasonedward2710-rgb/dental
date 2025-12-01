@@ -2,18 +2,18 @@
 
 {% block content %}
 <h1>Infinity Digital Dentistry: Lab Management System</h1>
-<form method="GET" action="{{ url_for('index') }}">
+<form id="filter-form">
     <div class="filter-form">
         <div class="filter-group">
             <label for="search_query">Search:</label>
-            <input type="text" id="search_query" name="search_query" value="{{ search_query }}">
+            <input type="text" id="search_query" name="search_query">
         </div>
         <div class="filter-group">
             <label for="practice_filter">Filter by Practice:</label>
             <select id="practice_filter" name="practice_filter">
                 <option value="">All Practices</option>
                 {% for practice in practices %}
-                <option value="{{ practice.name }}" {% if practice_filter == practice.name %}selected{% endif %}>{{ practice.name }}</option>
+                <option value="{{ practice.name }}">{{ practice.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -22,15 +22,14 @@
             <select id="doctor_filter" name="doctor_filter">
                 <option value="">All Doctors</option>
                 {% for doctor in doctors %}
-                <option value="{{ doctor.name }}" {% if doctor_filter == doctor.name %}selected{% endif %}>{{ doctor.name }}</option>
+                <option value="{{ doctor.name }}">{{ doctor.name }}</option>
                 {% endfor %}
             </select>
+        </div>
         <div class="filter-group">
-    <label for="due_date_filter">Filter by Due Date:</label>
-    <input type="date" id="due_date_filter" name="due_date_filter" value="{{ due_date_filter }}">
-        </div>       
-        <button type="submit" class="filter-button">Search/Apply</button>
-        <a href="{{ url_for('index') }}" class="refresh-button">Reset Filters</a>
+            <label for="due_date_filter">Filter by Due Date:</label>
+            <input type="date" id="due_date_filter" name="due_date_filter">
+        </div>
     </div>
 </form>
 
@@ -53,31 +52,185 @@
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody>
-            {% for job in jobs %}
-            <tr>
-                <td>{{ job.created_date.strftime('%d/%m/%Y') }}</td>
-                <td>{{ job.patient_name }}</td>
-                <td>{{ job.doctor_name }}</td>
-                <td>{{ job.job_type }}</td>
-                <td>{{ job.practice_name }}</td>
-                <td>{{ job.lab_slip_number }}</td>
-                <td>{{ job.job_status }}</td>
-                <td>{{ job.due_date.strftime('%d/%m/%Y') }}</td>
-                <td>{{ job.shade }}</td>
-                <td>{{ job.invoice_number }}</td>
-                <td>{{ job.delivery_info }}</td>
-                <td>{{ job.comments }}</td>
-                <td class="actions">
-                    <a href="{{ url_for('job', id=job.id) }}" class="btn btn-primary btn-sm">View</a>
-                    <a href="{{ url_for('edit_job', id=job.id) }}" class="btn btn-secondary btn-sm">Edit</a>
-                    <form action="{{ url_for('delete_job', id=job.id) }}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this job?');">
-                        <button type="submit" class="delete-button">X</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
+        <tbody id="jobs-table-body">
+            <!-- Job rows will be inserted here by JavaScript -->
         </tbody>
     </table>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Delete Job</h2>
+        <p>Are you sure you want to delete this job?</p>
+        <button id="confirm-delete" class="btn btn-danger">Delete</button>
+        <button id="cancel-delete" class="btn btn-secondary">Cancel</button>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast" style="display:none;"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const jobsTableBody = document.getElementById('jobs-table-body');
+    const searchInput = document.getElementById('search_query');
+    const practiceFilter = document.getElementById('practice_filter');
+    const doctorFilter = document.getElementById('doctor_filter');
+    const dueDateFilter = document.getElementById('due_date_filter');
+    const deleteModal = document.getElementById('delete-modal');
+    const confirmDeleteButton = document.getElementById('confirm-delete');
+    const cancelDeleteButton = document.getElementById('cancel-delete');
+    const closeButton = document.querySelector('.close-button');
+    const toast = document.getElementById('toast');
+    let jobs = [];
+    let jobToDeleteId = null;
+
+    function showToast(message) {
+        toast.textContent = message;
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    }
+
+    function renderJobs(filteredJobs) {
+        jobsTableBody.innerHTML = '';
+        filteredJobs.forEach(job => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${job.created_date}</td>
+                <td>${job.patient_name}</td>
+                <td>${job.doctor_name}</td>
+                <td>${job.job_type}</td>
+                <td>${job.practice_name}</td>
+                <td>${job.lab_slip_number}</td>
+                <td>${job.job_status}</td>
+                <td>${job.due_date}</td>
+                <td>${job.shade}</td>
+                <td>${job.invoice_number}</td>
+                <td>${job.delivery_info}</td>
+                <td>${job.comments}</td>
+                <td class="actions">
+                    <a href="/job/${job.id}" class="btn btn-primary btn-sm">View</a>
+                    <a href="/edit_job/${job.id}" class="btn btn-secondary btn-sm">Edit</a>
+                    <button class="btn btn-danger btn-sm delete-button" data-id="${job.id}">X</button>
+                </td>
+            `;
+            jobsTableBody.appendChild(row);
+        });
+
+        // Add event listeners to delete buttons
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', function() {
+                jobToDeleteId = this.dataset.id;
+                deleteModal.style.display = 'block';
+            });
+        });
+    }
+
+    function filterAndRender() {
+        const searchQuery = searchInput.value.toLowerCase();
+        const practice = practiceFilter.value;
+        const doctor = doctorFilter.value;
+        const dueDate = dueDateFilter.value;
+
+        let filteredJobs = jobs;
+
+        const anyFilterActive = searchQuery || practice || doctor || dueDate;
+
+        if (anyFilterActive) {
+            filteredJobs = jobs.filter(job => {
+                const matchesSearch = !searchQuery || 
+                                      job.patient_name.toLowerCase().includes(searchQuery) ||
+                                      job.lab_slip_number.toLowerCase().includes(searchQuery) ||
+                                      job.invoice_number.toLowerCase().includes(searchQuery);
+                const matchesPractice = !practice || job.practice_name === practice;
+                const matchesDoctor = !doctor || job.doctor_name === doctor;
+                const matchesDueDate = !dueDate || job.due_date.split('/').reverse().join('-') === dueDate;
+
+                return matchesSearch && matchesPractice && matchesDoctor && matchesDueDate;
+            });
+        } else {
+            // Default view: next 3 days and specific statuses
+            const today = new Date();
+            const threeDaysLater = new Date();
+            threeDaysLater.setDate(today.getDate() + 3);
+
+            const statuses = ['In Production', 'Ready For Delivery', 'In Transit To Practice'];
+
+            filteredJobs = jobs.filter(job => {
+                const dueDate = new Date(job.due_date.split('/').reverse().join('-'));
+                return dueDate >= today && dueDate <= threeDaysLater && statuses.includes(job.job_status);
+            });
+        }
+
+        renderJobs(filteredJobs);
+    }
+    
+    fetch('/api/jobs')
+        .then(response => response.json())
+        .then(data => {
+            jobs = data;
+            filterAndRender();
+        });
+
+    searchInput.addEventListener('input', filterAndRender);
+    practiceFilter.addEventListener('change', filterAndRender);
+    doctorFilter.addEventListener('change', filterAndRender);
+    dueDateFilter.addEventListener('change', filterAndRender);
+
+    // Modal listeners
+    closeButton.addEventListener('click', () => {
+        deleteModal.style.display = 'none';
+    });
+
+    cancelDeleteButton.addEventListener('click', () => {
+        deleteModal.style.display = 'none';
+    });
+
+    confirmDeleteButton.addEventListener('click', () => {
+        if (jobToDeleteId) {
+            // Optimistic UI: remove from view immediately
+            const jobRow = document.querySelector(`button[data-id='''${jobToDeleteId}''']`).closest('tr');
+            jobRow.remove();
+            
+            fetch(`/api/delete_job/${jobToDeleteId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showToast(data.error);
+                        // If there was an error, refetch the jobs to restore the deleted row
+                        fetch('/api/jobs')
+                            .then(response => response.json())
+                            .then(data => {
+                                jobs = data;
+                                filterAndRender();
+                            });
+                    } else {
+                        showToast(data.message);
+                        // Remove the job from the local `jobs` array
+                        jobs = jobs.filter(job => job.id !== parseInt(jobToDeleteId));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting job:', error);
+                    showToast('An error occurred while deleting the job.');
+                    // If there was an error, refetch the jobs to restore the deleted row
+                    fetch('/api/jobs')
+                        .then(response => response.json())
+                        .then(data => {
+                            jobs = data;
+                            filterAndRender();
+                        });
+                });
+            deleteModal.style.display = 'none';
+            jobToDeleteId = null;
+        }
+    });
+});
+</script>
 {% endblock %}

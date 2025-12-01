@@ -56,5 +56,23 @@ class Job(db.Model):
     created_date = db.Column(db.DateTime, default=datetime.utcnow)
     updated_date = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'job_type': self.job_type,
+            'practice_name': self.practice_name,
+            'doctor_name': self.doctor_name,
+            'patient_name': self.patient_name,
+            'lab_slip_number': self.lab_slip_number,
+            'job_status': self.job_status,
+            'due_date': self.due_date.strftime('%d/%m/%Y') if self.due_date else None,
+            'shade': self.shade,
+            'invoice_number': self.invoice_number,
+            'delivery_info': self.delivery_info,
+            'comments': self.comments,
+            'created_date': self.created_date.strftime('%d/%m/%Y') if self.created_date else None,
+            'updated_date': self.updated_date.strftime('%d/%m/%Y') if self.updated_date else None
+        }
+
     def __repr__(self):
         return '<Job {}>'.format(self.patient_name)

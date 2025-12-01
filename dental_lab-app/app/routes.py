@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, jsonify
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, JobForm, PracticeForm, DoctorForm, EditJobForm
 from flask_login import current_user, login_user, logout_user, login_required
@@ -97,6 +97,12 @@ def index():
         due_date_filter=due_date_filter
     )
 
+@app.route('/api/jobs', methods=['GET'])
+@login_required
+def get_jobs():
+    
+    jobs = Job.query.all()
+    return jsonify([job.to_dict() for job in jobs])
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -142,6 +148,10 @@ def register():
 def add_job():
     form = JobForm()
     if form.validate_on_submit():
+        existing_job = Job.query.filter_by(lab_slip_number=form.lab_slip_number.data).first()
+        if existing_job:
+            flash('This lab slip number already exists. Please check the details.')
+            return render_template('add_edit_job.html', title='Add Job', form=form)
         job = Job(
             job_type=form.job_type.data,
             practice_name=Practice.query.get(form.practice_name.data).name,
@@ -236,3 +246,13 @@ def delete_job(id):
     db.session.delete(job)
     db.session.commit()
     return redirect(url_for('index'))
+
+@app.route('/api/delete_job/<int:id>', methods=['DELETE'])
+@login_required
+def api_delete_job(id):
+    if not current_user.is_admin:
+        return jsonify({'error': 'Admin access required'}), 403
+    job = Job.query.get_or_404(id)
+    db.session.delete(job)
+    db.session.commit()
+    return jsonify({'message': 'Job deleted successfully'})
